@@ -1,0 +1,24 @@
+{
+  "name": "huecontrol",
+  "version": "1.0.0",
+  "description": "Control Philips HUE using leap motion",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stefangeyer/huecontrol.git"
+  },
+  "author": "Stefan Geyer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stefangeyer/huecontrol/issues"
+  },
+  "homepage": "https://github.com/stefangeyer/huecontrol#readme",
+  "dependencies": {
+    "cylon": "^1.3.0",
+    "cylon-hue": "^0.7.0",
+    "cylon-leapmotion": "^0.21.0"
+  }
+}
