@@ -1,22 +1,41 @@
-export class LeapmotionEvent {
+export abstract class Gesture {
+    id: Number;
+    duration: Number;
+    
+    constructor(id: Number, duration: Number) {
+        this.id = id;
+        this.duration = duration;
+    }
 }
 
 export enum Direction {
-    Up,
-    Down,
-    Left,
-    Right
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT"
 }
 
-export class SwipeEvent extends LeapmotionEvent {
+export class SwipeGesture extends Gesture {
     direction: Direction;
-    directionX: Number;
-    directionY: Number;
+    deltaX: Number;
+    deltaY: Number;
 
-    constructor(direction: Direction, directionX: Number, directionY: Number) {
-        super();
+    constructor(id: Number, duration: Number, direction: Direction, deltaX: Number, deltaY: Number) {
+        super(id, duration);
         this.direction = direction;
-        this.directionX = directionX;
-        this.directionY = directionY;
+        this.deltaX = deltaX;
+        this.deltaY = deltaY;
     }
+}
+
+export class CircleGesture extends Gesture {
+
+}
+
+export class ScreenTapGesture extends Gesture {
+
+}
+
+export class KeyTapGesture extends Gesture {
+
 }
