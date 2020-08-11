@@ -1,9 +1,8 @@
 {
   "name": "huecontrol",
   "version": "1.0.0",
-  "type": "module",
   "description": "Control Philips HUE using leap motion",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "tsc": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,6 +18,7 @@
   },
   "homepage": "https://github.com/stefangeyer/huecontrol#readme",
   "dependencies": {
+    "commonjs": "0.0.1",
     "cylon": "^1.3.0",
     "cylon-hue": "^0.7.0",
     "cylon-leapmotion": "^0.21.0",
