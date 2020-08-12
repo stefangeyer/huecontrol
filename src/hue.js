@@ -1,5 +1,42 @@
 import Cylon from 'cylon';
+import { Subject } from 'rxjs';
+import { Brightness, Saturation, Light } from './model'
+import { distinctUntilChanged, tap, map, delay, filter } from 'rxjs/operators';
 
+export const actions = new Subject();
+export const lightState = new Subject().pipe(
+    distinctUntilChanged(),
+);
+
+const delayMs = 50;
+
+const fetchState = (hue) => {
+    hue.getFullState((err, config) => {
+        if (err != null) {
+            console.log("Could not fetch state " + err);
+            return;
+        }
+        const lightData = config.lights;
+        const lights = []
+        for (const [id, data] of Object.entries(lightData)) {
+            const state = data.state;
+            const light = new Light(
+                id, state.bri, state.colormode, state.ct,
+                state.effect, state.hue, state.mode, state.on,
+                state.reachable, state.sat, state.xy);
+            lights.push(light);
+        }
+        lightState.next(lights);
+        console.log(lights);
+    })
+}
+
+const forEachBulb = (devices, callback) => {
+    for (const bulbId in devices) {
+        const bulb = devices[bulbId];
+        callback(bulb);
+    }
+}
 
 Cylon.robot({
     name: "huebot",
@@ -15,7 +52,43 @@ Cylon.robot({
     },
 
     work: (my) => {
+        // publish initial values
+        fetchState(my.hue);
+
+        // TODO Handle this differently
+        forEachBulb(my.devices, (bulb) => {
+            bulb.turnOn();
+        });
+
+        // process actions
+        actions.pipe(
+            filter(action => action instanceof Brightness),
+            map(action => action.value),
+            map(brightness => Math.max(0, brightness)),
+            map(brightness => Math.max(brightness, 100)),
+            tap(brightness => {
+                forEachBulb(my.devices, (bulb) => {
+                    bulb.brightness(brightness);
+                });
+            }),
+            delay(delayMs),
+        ).subscribe(brightness => {
+            fetchState(my.hue);
+        });
+
+        actions.pipe(
+            filter(action => action instanceof Saturation),
+            map(action => action.value),
+            map(saturation => Math.max(0, saturation)),
+            map(saturation => Math.max(saturation, 100)),
+            tap(saturation => {
+                forEachBulb(my.devices, (bulb) => {
+                    // bulb.saturation(saturation);
+                });
+            }),
+            delay(delayMs),
+        ).subscribe(saturation => {
+            fetchState(my.hue);
+        });
     }
 }).start();
-
-export const bulbs = Cylon.MCP.robots.huebot.devices;

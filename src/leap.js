@@ -62,4 +62,3 @@ export const leapmotion = new Observable(subscriber => {
         }
     }).start();
 });
-
