@@ -1,5 +1,5 @@
 // To run:
-// $ node app.js [IP] [username]
+// $ node app.ts [IP] [username]
 
 import { leapmotion } from './leap';
 import { actions as hue, lightState } from './hue';
