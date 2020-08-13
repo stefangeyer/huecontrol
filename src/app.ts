@@ -7,7 +7,7 @@ import { SwipeGesture, CircleGesture, Direction, Brightness, HueAction, Saturati
 import { filter, groupBy, throttleTime, mergeMap, map, distinctUntilChanged } from 'rxjs/operators';
 import { combineLatest, GroupedObservable, Observable, ObservableInput } from 'rxjs';
 
-const throttleMs = 2000;
+const throttleMs = 500;
 
 combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
     leapmotion.pipe(
@@ -24,6 +24,7 @@ combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
         distinctUntilChanged(),
     )
 ).subscribe(([gesture, lights]: [SwipeGesture, Light[]]) => {
+    console.log(gesture);
     const bri = lights[0].bri;
     const sat = lights[0].sat;
     const delta = 50;
