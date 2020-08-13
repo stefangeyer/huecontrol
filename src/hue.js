@@ -1,12 +1,10 @@
 import Cylon from 'cylon';
-import { Subject } from 'rxjs';
+import { Subject, interval } from 'rxjs';
 import { Brightness, Saturation, Light } from './model'
-import { distinctUntilChanged, tap, map, delay, filter } from 'rxjs/operators';
+import { distinctUntilChanged, map, filter } from 'rxjs/operators';
 
 export const actions = new Subject();
-export const lightState = new Subject().pipe(
-    distinctUntilChanged(),
-);
+export const lightState = new Subject();
 
 const delayMs = 50;
 
@@ -52,10 +50,10 @@ Cylon.robot({
     },
 
     work: (my) => {
-        // publish initial values
+        // fetch initial state
         fetchState(my.hue);
 
-        // TODO Handle this differently
+        // TODO handle this differently
         forEachBulb(my.devices, (bulb) => {
             bulb.turnOn();
         });
@@ -66,14 +64,10 @@ Cylon.robot({
             map(action => action.value),
             map(brightness => Math.max(0, brightness)),
             map(brightness => Math.max(brightness, 100)),
-            tap(brightness => {
-                forEachBulb(my.devices, (bulb) => {
-                    bulb.brightness(brightness);
-                });
-            }),
-            delay(delayMs),
         ).subscribe(brightness => {
-            fetchState(my.hue);
+            forEachBulb(my.devices, (bulb) => {
+                bulb.brightness(brightness);
+            });
         });
 
         actions.pipe(
@@ -81,14 +75,10 @@ Cylon.robot({
             map(action => action.value),
             map(saturation => Math.max(0, saturation)),
             map(saturation => Math.max(saturation, 100)),
-            tap(saturation => {
-                forEachBulb(my.devices, (bulb) => {
-                    // bulb.saturation(saturation);
-                });
-            }),
-            delay(delayMs),
         ).subscribe(saturation => {
-            fetchState(my.hue);
+            forEachBulb(my.devices, (bulb) => {
+                // bulb.saturation(saturation);
+            });
         });
     }
 }).start();

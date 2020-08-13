@@ -3,31 +3,33 @@
 
 import { leapmotion } from './leap';
 import { actions as hue, lightState } from './hue';
-import { SwipeGesture, CircleGesture, Direction, Brightness, HueAction, Saturation, Light } from './model';
-import { filter, groupBy, throttleTime, mergeMap, map } from 'rxjs/operators';
-import { combineLatest, Observable } from 'rxjs';
+import { SwipeGesture, CircleGesture, Direction, Brightness, HueAction, Saturation, Light, LeapmotionEvent, Gesture } from './model';
+import { filter, groupBy, throttleTime, mergeMap, map, distinctUntilChanged } from 'rxjs/operators';
+import { combineLatest, GroupedObservable, Observable, ObservableInput } from 'rxjs';
 
 const throttleMs = 2000;
 
-combineLatest(
+combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
     leapmotion.pipe(
-        filter(event => event instanceof SwipeGesture),
-        groupBy(event => event.direction),
-        mergeMap(group$ => group$.pipe(throttleTime(throttleMs))),
-        map(event => event as SwipeGesture),
+        filter((event: LeapmotionEvent) => event instanceof SwipeGesture),
+        map((event: LeapmotionEvent) => event as SwipeGesture),
+        groupBy((gesture: SwipeGesture) => gesture.direction),
+        mergeMap((group$: GroupedObservable<Direction, SwipeGesture>) =>
+            group$.pipe(
+                throttleTime(throttleMs),
+            )
+        ),
     ),
     lightState.pipe(
-        map(lights => lights as Array<Light>),
+        distinctUntilChanged(),
     )
-).subscribe((x) => {
-    const event = x[0] as SwipeGesture;
-    const lights = x[1] as Array<Light>;
+).subscribe(([gesture, lights]: [SwipeGesture, Light[]]) => {
     const bri = lights[0].bri;
     const sat = lights[0].sat;
     const delta = 50;
     let action = null;
 
-    switch (event.direction) {
+    switch (gesture.direction) {
         case Direction.Up:
             action = new Brightness(bri + delta);
             break;

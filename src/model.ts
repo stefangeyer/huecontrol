@@ -1,6 +1,9 @@
 // LeapMotion
 
-export abstract class Gesture {
+export interface LeapmotionEvent {
+}
+
+export abstract class Gesture implements LeapmotionEvent {
     id: number;
     duration: number;
 
