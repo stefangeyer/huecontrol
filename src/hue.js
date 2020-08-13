@@ -1,7 +1,7 @@
 import Cylon from 'cylon';
-import { Subject, interval } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Brightness, Saturation, Light } from './model'
-import { distinctUntilChanged, map, filter } from 'rxjs/operators';
+import { map, filter } from 'rxjs/operators';
 
 export const actions = new Subject();
 export const lightState = new Subject();

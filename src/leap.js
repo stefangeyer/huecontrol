@@ -1,7 +1,6 @@
 import Cylon from 'cylon';
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { Direction, SwipeGesture, CircleGesture, KeyTapGesture, ScreenTapGesture } from './model';
-
 
 export const leapmotion = new Subject();
 
