@@ -7,6 +7,10 @@ The aim of this project is to make use of the existing gestures that come with t
 
 As of now, the script will manage all of the lights registered at the Hue bridge, meaning that it is not possible to select a subset of lights that will be used. The script will also not create a Hue user and requires a username in order to work.
 
+The following gestures will have an effect on the lights:
+ * *Swipe up/down: adjust brightness*
+ * *Circle: random color*
+
 The script can be run using the following command:
 
 ```sh
