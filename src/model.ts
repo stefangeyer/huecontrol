@@ -1,5 +1,7 @@
 // LeapMotion
 
+import { groupBy } from "rxjs/operators";
+
 export interface LeapmotionEvent {
 }
 
@@ -57,6 +59,32 @@ export class Brightness implements HueAction {
     percentage() {
         let value = Math.max(1, Math.min(254, this.value));
         return (value / 254) * 100;
+    }
+}
+
+export class Color implements HueAction {
+    red: number;
+    blue: number;
+    green: number;
+
+    constructor(red: number, green: number, blue: number) {
+        this.red = red;
+        this.green = green;
+        this.blue = blue;
+    }
+}
+
+export class RandomColor extends Color {
+    constructor() {
+        super(
+            RandomColor.randomNumber(),
+            RandomColor.randomNumber(),
+            RandomColor.randomNumber()
+        );
+    }
+
+    static randomNumber() {
+        return Math.floor(Math.random() * 255);
     }
 }
 

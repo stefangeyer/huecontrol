@@ -3,12 +3,9 @@
 
 import { leapmotion } from './leap';
 import { actions as hue, lightState, currentLightState } from './hue';
-import { SwipeGesture, CircleGesture, Direction, Brightness, Light, LeapmotionEvent } from './model';
+import { SwipeGesture, CircleGesture, Direction, Brightness, Light, LeapmotionEvent, RandomColor } from './model';
 import { filter, groupBy, throttleTime, mergeMap, map, distinctUntilChanged, debounceTime, tap } from 'rxjs/operators';
 import { combineLatest, GroupedObservable, Observable } from 'rxjs';
-
-const throttleMs = 100;
-
 
 combineLatest<Observable<any>, [[SwipeGesture, number], Light[]]>(
     leapmotion.pipe(
@@ -19,7 +16,7 @@ combineLatest<Observable<any>, [[SwipeGesture, number], Light[]]>(
             let count = 1;
             return group$.pipe(
                 map(gesture => [gesture, count++]),
-                debounceTime(throttleMs),
+                debounceTime(100),
                 tap(_ => count = 1),
             )
         }),
@@ -55,8 +52,9 @@ combineLatest<Observable<any>, [[SwipeGesture, number], Light[]]>(
 leapmotion.pipe(
     filter(event => event instanceof CircleGesture),
     map(event => event as CircleGesture),
-    filter(event => event.duration > 500000),
-    throttleTime(throttleMs),
-).subscribe(x => {
-    console.log(x);
+    filter(gesture => gesture.duration > 50000),
+    throttleTime(500),
+).subscribe(gesture => {
+    console.log(gesture);
+    hue.next(new RandomColor());
 });

@@ -1,6 +1,6 @@
 import Cylon from 'cylon';
 import { Subject } from 'rxjs';
-import { Brightness, Saturation, Light } from './model'
+import { Brightness, Color, Light } from './model'
 import { map, filter } from 'rxjs/operators';
 
 export const actions = new Subject();
@@ -69,6 +69,18 @@ Cylon.robot({
                 currentLightState[0].bri = brightness.value;
             });
             // fetchState(my.hue);
+        });
+
+        actions.pipe(
+            filter(action => action instanceof Color),
+        ).subscribe(color => {
+            forEachBulb(my.devices, (bulb) => {
+                bulb.rgb(
+                    color.red,
+                    color.green,
+                    color.blue
+                );
+            });
         });
     }
 }).start();
