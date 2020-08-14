@@ -2,32 +2,36 @@
 // $ node app.ts [IP] [username]
 
 import { leapmotion } from './leap';
-import { actions as hue, lightState } from './hue';
-import { SwipeGesture, CircleGesture, Direction, Brightness, HueAction, Saturation, Light, LeapmotionEvent, Gesture } from './model';
-import { filter, groupBy, throttleTime, mergeMap, map, distinctUntilChanged } from 'rxjs/operators';
-import { combineLatest, GroupedObservable, Observable, ObservableInput } from 'rxjs';
+import { actions as hue, lightState, currentLightState } from './hue';
+import { SwipeGesture, CircleGesture, Direction, Brightness, Light, LeapmotionEvent } from './model';
+import { filter, groupBy, throttleTime, mergeMap, map, distinctUntilChanged, debounceTime, tap } from 'rxjs/operators';
+import { combineLatest, GroupedObservable, Observable } from 'rxjs';
 
-const throttleMs = 500;
+const throttleMs = 100;
 
-combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
+
+combineLatest<Observable<any>, [[SwipeGesture, number], Light[]]>(
     leapmotion.pipe(
         filter((event: LeapmotionEvent) => event instanceof SwipeGesture),
         map((event: LeapmotionEvent) => event as SwipeGesture),
         groupBy((gesture: SwipeGesture) => gesture.direction),
-        mergeMap((group$: GroupedObservable<Direction, SwipeGesture>) =>
-            group$.pipe(
-                throttleTime(throttleMs),
+        mergeMap((group$: GroupedObservable<Direction, SwipeGesture>) => {
+            let count = 1;
+            return group$.pipe(
+                map(gesture => [gesture, count++]),
+                debounceTime(throttleMs),
+                tap(_ => count = 1),
             )
-        ),
+        }),
     ),
     lightState.pipe(
         distinctUntilChanged(),
     )
-).subscribe(([gesture, lights]: [SwipeGesture, Light[]]) => {
-    console.log(gesture);
-    const bri = lights[0].bri;
-    const sat = lights[0].sat;
-    const delta = 50;
+).subscribe(([gestures, lights]: [[SwipeGesture, number], Light[]]) => {
+    console.log(gestures);
+    const [gesture, count] = gestures;
+    const bri = currentLightState[0].bri;
+    const delta = 50 + count; // TODO change?
     let action = null;
 
     switch (gesture.direction) {
@@ -38,10 +42,8 @@ combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
             action = new Brightness(bri - delta);
             break;
         case Direction.Left:
-            action = new Saturation(sat + delta);
             break;
         case Direction.Right:
-            action = new Saturation(sat - delta);
             break;
     }
 
@@ -53,6 +55,7 @@ combineLatest<Observable<any>, [SwipeGesture, Light[]]>(
 leapmotion.pipe(
     filter(event => event instanceof CircleGesture),
     map(event => event as CircleGesture),
+    filter(event => event.duration > 500000),
     throttleTime(throttleMs),
 ).subscribe(x => {
     console.log(x);

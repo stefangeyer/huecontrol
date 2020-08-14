@@ -6,7 +6,7 @@ import { map, filter } from 'rxjs/operators';
 export const actions = new Subject();
 export const lightState = new Subject();
 
-const delayMs = 50;
+export let currentLightState = null;
 
 const fetchState = (hue) => {
     hue.getFullState((err, config) => {
@@ -25,6 +25,7 @@ const fetchState = (hue) => {
             lights.push(light);
         }
         lightState.next(lights);
+        currentLightState = lights;
         console.log(lights);
     })
 }
@@ -56,29 +57,18 @@ Cylon.robot({
         // TODO handle this differently
         forEachBulb(my.devices, (bulb) => {
             bulb.turnOn();
+            console.log(bulb.lightState());
         });
 
         // process actions
         actions.pipe(
             filter(action => action instanceof Brightness),
-            map(action => action.value),
-            map(brightness => Math.max(0, brightness)),
-            map(brightness => Math.max(brightness, 100)),
         ).subscribe(brightness => {
             forEachBulb(my.devices, (bulb) => {
-                bulb.brightness(brightness);
+                bulb.brightness(brightness.percentage());
+                currentLightState[0].bri = brightness.value;
             });
-        });
-
-        actions.pipe(
-            filter(action => action instanceof Saturation),
-            map(action => action.value),
-            map(saturation => Math.max(0, saturation)),
-            map(saturation => Math.max(saturation, 100)),
-        ).subscribe(saturation => {
-            forEachBulb(my.devices, (bulb) => {
-                // bulb.saturation(saturation);
-            });
+            // fetchState(my.hue);
         });
     }
 }).start();

@@ -53,13 +53,10 @@ export class Brightness implements HueAction {
     constructor(value: number) {
         this.value = value;
     }
-}
 
-export class Saturation implements HueAction {
-    value: number;
-
-    constructor(value: number) {
-        this.value = value;
+    percentage() {
+        let value = Math.max(1, Math.min(254, this.value));
+        return (value / 254) * 100;
     }
 }
 
