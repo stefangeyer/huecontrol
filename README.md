@@ -14,5 +14,5 @@ The following gestures will have an effect on the lights:
 The script can be run using the following command:
 
 ```sh
-ts-node src/app.ts <bridge-ip> <hue-user>
+npm run huecontrol <bridge-ip> <hue-user>
 ```
